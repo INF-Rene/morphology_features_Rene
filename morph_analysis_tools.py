@@ -176,3 +176,32 @@ def get_sections_hullvolume(secs):
     return volume
 #    plt.scatter(cloud[:,0], cloud[:,1])
 #    plt.plot(cloud[hull.vertices,0], cloud[hull.vertices,1], 'r--', lw=2)
+
+def get_leafs(secs):
+    endleafs=list()
+    for sec in secs:
+        if sec.is_leaf():
+            endleafs.append(sec)
+    return endleafs
+            
+def get_leaf_features(sec):
+    DLL=sec.length
+    pathlength=0
+    order=0
+    branchlengths=list()
+    parsec=sec
+    while not parsec.is_root():
+        order+=1
+        pathlength+=parsec.length
+        parsec=parsec.parent
+        branchlengths.append(parsec.length)
+    pathlength+=parsec.length
+   
+    DBL_total=np.array(branchlengths).sum()
+    if branchlengths:
+        DBL_mean=np.array(branchlengths).mean()
+    else:
+        DBL_mean=0
+    branchlengths=branchlengths[::-1] # from low to high order
+    return DLL, DBL_total, DBL_mean, order, pathlength, branchlengths
+    
