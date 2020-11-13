@@ -7,8 +7,8 @@ Created on Wed Jul 17 16:03:39 2019
 
 #user settings
 output_name = 'SWC_test' # will be used for excel file names
-morphdir = r'E:\Stage\Data_Image_stacks\Interpolated' # directory of morphologies. optional .marker files can be added in this folder to indicate truncation points
-outputdir= r'E:\Stage\Data_Image_stacks\interpolated_out'  #output directory
+morphdir = r'C:\YourInputDirectory' # directory of morphologies. optional .marker files can be added in this folder to indicate truncation points
+outputdir= r'C:\YourOutputDirectory'  #output directory
 
 #morphology properties
 
@@ -42,13 +42,15 @@ df=pd.DataFrame(columns=['id','species','layer',
                          'TDL_B', 'denddiam_B', 'TDV_B', 'DBP_B', 'dendreachvol_B', 'TDA_B', 'DSC_B',
                          'dendleaforder_B', 'dendpathlength_B', 'dendleaflength_B', 'dendbranchlength_B', 'dendmaxpathlength_B',
                          'dendmeanleafdiam_B','dendmeanbranchdiam_B',
-                         'axleaforder', 'axpathlength', 'axleaflength', 'axbranchlength', 'axmaxpathlength'])
+                         'axleaforder', 'axpathlength', 'axleaflength', 'axbranchlength', 'axmaxpathlength',
+                         'full_dendrites', 'BPs_per_full_dendrite'])
 orderdf=pd.DataFrame(columns=['id','species','layer','order',
                          'TDL', 'denddiam', 'TDV', 'DBL', 'DLL','TDA'])
 thicknesspath=pd.DataFrame(columns=['id','species','layer',
                                     'pathlengths', 'thicknesses'])
 
 for index,file in enumerate(files):
+    print('Analyzing file #'+str(index+1)+' out of '+str(len(files)))
 #    if index>0:
 #        fig.add_subplot(7,10,index+1, sharex=ax, sharey=ax)
 #        plt.axis('off')
@@ -62,7 +64,7 @@ for index,file in enumerate(files):
         if markerfn:
             markerdata=pd.read_csv(os.path.join(morphdir, markerfn[0]))
             if 'name' in markerdata.columns:
-               markerdata.drop(markerdata[markerdata['name']==30].index)
+               markerdata=markerdata.drop(markerdata[markerdata['name']==30].index)
         else:
             print('no markerfile found for neuron ' + str(nrnid))
                 
@@ -89,8 +91,9 @@ for index,file in enumerate(files):
             DSC = DSC_A+DSC_B
             dendreachvol=get_sections_hullvolume(dend)
             dendleaforder, dendpathlength, dendleaflength, dendbranchlength, dendmaxpathlength, dendmeanleafdiam, dendmeanbranchdiam = get_endleaf_data(dend,markerdata)
+            full_dendrites, BPs_per_full_dendrite = get_full_dendrite_measures(dend, markerdata)
         else:
-            TDL= denddiam= TDV= DBP= DBL= TDA= DSC= dendreachvol= dendleaforder= dendpathlength= dendleaflength= dendbranchlength= dendmaxpathlength= dendmeanleafdiam= dendmeanbranchdiam = float('nan')
+            TDL= denddiam= TDV= DBP= DBL= TDA= DSC= dendreachvol= dendleaforder= dendpathlength= dendleaflength= dendbranchlength= dendmaxpathlength= dendmeanleafdiam= dendmeanbranchdiam= full_dendrites= BPs_per_full_dendrite = float('nan')
             
         if dendApical:
             TDL_A, denddiam_A, TDV_A, DBP_A, DBL_A, TDA_A = get_seclist_measures(dendApical)
@@ -136,7 +139,8 @@ for index,file in enumerate(files):
                       'dendbranchlength_B':dendbranchlength_B, 'dendmaxpathlength_B':dendmaxpathlength_B,
                       'dendmeanleafdiam_B':dendmeanleafdiam_B,'dendmeanbranchdiam_B':dendmeanbranchdiam_B,
                       'axleaforder':axleaforder, 'axpathlength':axpathlength, 'axleaflength':axleaflength,
-                      'axbranchlength':axbranchlength, 'axmaxpathlength':axmaxpathlength},
+                      'axbranchlength':axbranchlength, 'axmaxpathlength':axmaxpathlength,
+                      'full_dendrites':full_dendrites, 'BPs_per_full_dendrite':BPs_per_full_dendrite},
                         ignore_index=True)
         # mean dendritic parameters per dendritic branch order
         TL, meanDIAM, TV, BL, LL, TA = get_seclist_measures_by_order(dend)

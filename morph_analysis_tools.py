@@ -149,6 +149,41 @@ def get_stem_count(neuron, secname,parnames):
             SC+=1
     return SC
 
+def get_full_dendrite_measures(secs, markerdata):
+    #first get stems
+    stemsecs=[]
+    for sec in secs:
+        if sec.is_root():
+            stemsecs.append(sec)
+    DSC=0
+    full_secs=[]
+    for sec in stemsecs:
+        #check if any downstream child is truncated
+        truncated=False
+        children=get_all_children(sec)
+        for child in children:
+            if child.is_leaf() and is_truncated(child, markerdata):
+                truncated=True
+        if not truncated:
+            full_secs.append(sec)
+            full_secs.extend(children)
+            DSC+=1
+    BP=0
+    for sec in full_secs:
+        if sec.children:
+            BP+=1
+    BPPD=BP/DSC
+    return DSC, BPPD
+        
+def get_all_children(sec):
+    children=[]
+    if sec.children:
+        children.extend(sec.children)
+        for child in sec.children:
+            children.extend(get_all_children(child))
+    return children
+
+
 def get_seclist_measures(secs):
     lengths=list()
     diams=list()
