@@ -38,12 +38,7 @@ def get_sections(neuron, secname):
             secs.append(section)
     return secs
 
-def print_section_types(neuron, secname):
-    for section in iter_sections(neuron):
-        print(getattr(NeuriteType, secname))
-    return 
-
-def get_endleaf_data(secs, markerdata):
+def get_endleaf_data(secs):
     endleafs=list()
     leaflengths=list()
     leafdiams=list()
@@ -52,7 +47,7 @@ def get_endleaf_data(secs, markerdata):
     branchdiams=list()
     pathlengths=list()
     for i,sec in enumerate(secs):
-        if sec.is_leaf() and not is_truncated(sec, markerdata):
+        if sec.is_leaf():
             endleafs.append(sec)
             leaflengths.append(sec.length)
             pathlengths.append(0)
@@ -64,7 +59,7 @@ def get_endleaf_data(secs, markerdata):
                 pathlengths[-1]+=parsec.length
                 parsec=parsec.parent
             pathlengths[-1]+=parsec.length
-        elif not is_truncated(sec, markerdata):
+        else:
             branchlengths.append(sec.length)
             branchdiams.append( np.sqrt((sec.volume/sec.length)/np.pi)*2 )
     meanleaforder=np.array(leaforders).mean()
@@ -210,14 +205,3 @@ def get_leaf_features(sec):
     branchlengths=branchlengths[::-1] # from low to high order
     return DLL, DBL_total, DBL_mean, order, pathlength, branchlengths
     
-def is_truncated(sec, markerdata):
-    truncated=False
-    if markerdata.empty:
-        return truncated
-    for point in sec.points:
-        for marker in np.array(markerdata[['x', 'y', 'z']]):
-            dist = np.linalg.norm(marker-point[0:3])
-            if dist<5:
-                truncated=True
-                return truncated
-    return truncated

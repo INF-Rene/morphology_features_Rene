@@ -6,9 +6,9 @@ Created on Wed Jul 17 16:03:39 2019
 """
 
 #user settings
-output_name = 'SWC_test' # will be used for excel file names
-morphdir = r'E:\Stage\Data_Image_stacks\Interpolated' # directory of morphologies. optional .marker files can be added in this folder to indicate truncation points
-outputdir= r'E:\Stage\Data_Image_stacks\interpolated_out'  #output directory
+output_name = 'your_experiment_name' # will be used for excel file names
+morphdir = r'C:\YourInputDirectory' # directory of morphologies. Put only SWC & ASC files in this directory!
+outputdir= r'C:\YourOutputDirectory'  #output directory
 
 #morphology properties
 
@@ -21,15 +21,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from morph_analysis_tools import *
 
-allfiles=os.listdir(morphdir)
-files=[]
-markerfiles=[]
-for file in allfiles:
-    if file.endswith(".swc"):
-        files.append(file)
-    if file.endswith(".marker"):
-        markerfiles.append(file)
-
+files=os.listdir(morphdir)
 
 df=pd.DataFrame(columns=['id','species','layer',
                          'TAL', 'axdiam','TAV', 'axstart','ABP','axreachvol','TAA',
@@ -58,26 +50,17 @@ for index,file in enumerate(files):
     layer=fnsplit[1]
     try:
         nrn = nm.load_neuron(os.path.join(morphdir, file))
-        markerfn =[a for a in markerfiles if str(nrnid) in a] 
-        if markerfn:
-            markerdata=pd.read_csv(os.path.join(morphdir, markerfn[0]))
-            if 'name' in markerdata.columns:
-               markerdata.drop(markerdata[markerdata['name']==30].index)
-        else:
-            print('no markerfile found for neuron ' + str(nrnid))
-                
         #get neuron stats
         axon=get_sections(nrn, 'axon')
         dendBasal=get_sections(nrn, 'basal_dendrite')
         dendApical=get_sections(nrn, 'apical_dendrite')
         dend = dendBasal + dendApical
     
-    
         if axon:
             TAL, axdiam, TAV, ABP, ABL, TAA  = get_seclist_measures(axon)
             ASC = get_stem_count(nrn, 'axon', ['soma', 'basal_dendrite'])
             axreachvol=get_sections_hullvolume(axon)
-            axleaforder, axpathlength, axleaflength, axbranchlength, axmaxpathlength, meanleafdiam, meanbranchdiam = get_endleaf_data(axon, markerdata)
+            axleaforder, axpathlength, axleaflength, axbranchlength, axmaxpathlength, meanleafdiam, meanbranchdiam = get_endleaf_data(axon)
         else:
             TAL= axdiam= TAV= ABP= ABL= TAA= ASC =axreachvol =axleaforder= axpathlength= axleaflength= axbranchlength= axmaxpathlength= meanleafdiam= meanbranchdiamaxreachvol= float('nan')
         
@@ -88,21 +71,21 @@ for index,file in enumerate(files):
             TDL, denddiam, TDV, DBP, DBL, TDA = get_seclist_measures(dend) 
             DSC = DSC_A+DSC_B
             dendreachvol=get_sections_hullvolume(dend)
-            dendleaforder, dendpathlength, dendleaflength, dendbranchlength, dendmaxpathlength, dendmeanleafdiam, dendmeanbranchdiam = get_endleaf_data(dend,markerdata)
+            dendleaforder, dendpathlength, dendleaflength, dendbranchlength, dendmaxpathlength, dendmeanleafdiam, dendmeanbranchdiam = get_endleaf_data(dend)
         else:
             TDL= denddiam= TDV= DBP= DBL= TDA= DSC= dendreachvol= dendleaforder= dendpathlength= dendleaflength= dendbranchlength= dendmaxpathlength= dendmeanleafdiam= dendmeanbranchdiam = float('nan')
             
         if dendApical:
             TDL_A, denddiam_A, TDV_A, DBP_A, DBL_A, TDA_A = get_seclist_measures(dendApical)
             dendreachvol_A=get_sections_hullvolume(dendApical)
-            dendleaforder_A, dendpathlength_A, dendleaflength_A, dendbranchlength_A, dendmaxpathlength_A, dendmeanleafdiam_A, dendmeanbranchdiam_A = get_endleaf_data(dendApical, markerdata)
+            dendleaforder_A, dendpathlength_A, dendleaflength_A, dendbranchlength_A, dendmaxpathlength_A, dendmeanleafdiam_A, dendmeanbranchdiam_A = get_endleaf_data(dendApical)
         else:
             TDL_A= denddiam_A= TDV_A= DBP_A= DBL_A= TDA_A=DSC_A= dendreachvol_A= dendleaforder_A= dendpathlength_A= dendleaflength_A= dendbranchlength_A= dendmaxpathlength_A= dendmeanleafdiam_A= dendmeanbranchdiam_A = float('nan')
         
         if dendBasal:
             TDL_B, denddiam_B, TDV_B, DBP_B, DBL_B, TDA_B = get_seclist_measures(dendBasal) 
             dendreachvol_B=get_sections_hullvolume(dendBasal)
-            dendleaforder_B, dendpathlength_B, dendleaflength_B, dendbranchlength_B, dendmaxpathlength_B, dendmeanleafdiam_B, dendmeanbranchdiam_B = get_endleaf_data(dendBasal, markerdata)
+            dendleaforder_B, dendpathlength_B, dendleaflength_B, dendbranchlength_B, dendmaxpathlength_B, dendmeanleafdiam_B, dendmeanbranchdiam_B = get_endleaf_data(dendBasal)
         else:
             TDL_B= denddiam_B= TDV_B= DBP_B= DBL_B= TDA_B=DSC_B= dendreachvol_B= dendleaforder_B= dendpathlength_B= dendleaflength_B= dendbranchlength_B= dendmaxpathlength_B= dendmeanleafdiam_B= dendmeanbranchdiam_B = float('nan')
             
